@@ -1,0 +1,103 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  address             String?
+  composition         Composition[]
+  createdAt           DateTime      @default(now())
+  firstName           String
+  gender              Int
+  id                  String        @id @default(cuid())
+  isStadiumSubscriber Boolean?
+  lastName            String
+  password            String
+  postalCode          String?
+  roles               String[]
+  updatedAt           DateTime      @updatedAt
+  username            String        @unique
+}
+
+model Team {
+  compositions     Composition[]
+  createdAt        DateTime          @default(now())
+  firstColor       String?
+  id               String            @id @default(cuid())
+  illustration     String?
+  legendaryPlayers LegendaryPlayer[]
+  matchesAsAway    Match[]           @relation(name: "awayTeam")
+  matchesAsHome    Match[]           @relation(name: "homeTeam")
+  name             String?
+  players          Player[]
+  secondColor      String?
+  thirdColor       String?
+  updatedAt        DateTime          @updatedAt
+}
+
+model Player {
+  age         Int?
+  birthday    DateTime?
+  createdAt   DateTime   @default(now())
+  displayName String?
+  firstName   String?
+  id          String     @id @default(cuid())
+  isLegendary Boolean?
+  lastName    String?
+  number      String?
+  positions   Position[]
+  team        Team?      @relation(fields: [teamId], references: [id])
+  teamId      String?
+  updatedAt   DateTime   @updatedAt
+}
+
+model Match {
+  awayTeam     Team?         @relation(name: "awayTeam", fields: [awayTeamId], references: [id])
+  awayTeamId   String?
+  competition  String?
+  compositions Composition[]
+  createdAt    DateTime      @default(now())
+  homeTeam     Team?         @relation(name: "homeTeam", fields: [homeTeamId], references: [id])
+  homeTeamId   String?
+  id           String        @id @default(cuid())
+  score        String?
+  stadium      String?
+  startDate    DateTime?
+  updatedAt    DateTime      @updatedAt
+}
+
+model Composition {
+  createdAt DateTime   @default(now())
+  id        String     @id @default(cuid())
+  match     Match      @relation(fields: [matchId], references: [id])
+  matchId   String
+  position  Position[]
+  team      Team       @relation(fields: [teamId], references: [id])
+  teamId    String
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+}
+
+model Position {
+  compositions   Composition? @relation(fields: [compositionsId], references: [id])
+  compositionsId String?
+  createdAt      DateTime     @default(now())
+  id             String       @id @default(cuid())
+  number         Int?
+  player         Player       @relation(fields: [playerId], references: [id])
+  playerId       String
+  updatedAt      DateTime     @updatedAt
+}
+
+model LegendaryPlayer {
+  createdAt DateTime @default(now())
+  id        String   @id @default(cuid())
+  name      String
+  team      Team[]
+  updatedAt DateTime @updatedAt
+}
